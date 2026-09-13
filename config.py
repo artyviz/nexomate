@@ -19,6 +19,15 @@ for d in [DATA_DIR, EXPORTS_DIR, IMPORTS_DIR, LOGS_DIR]:
 # ── Environment ──────────────────────────────────────────────────────────────
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
+try:
+    import streamlit as st
+    if hasattr(st, "secrets"):
+        for k, v in st.secrets.items():
+            if isinstance(v, str) and k not in os.environ:
+                os.environ[k] = v
+except Exception:
+    pass
+
 # ── SMTP ─────────────────────────────────────────────────────────────────────
 SMTP_HOST = os.getenv("SMTP_HOST", "")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
