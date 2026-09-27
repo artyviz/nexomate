@@ -193,3 +193,4 @@ Nexomate is pre-configured for 1-click free deployment on [Render.com](https://r
 
 Proprietary & Confidential — All rights reserved.
 "# nexomate_dev" 
+"# nexomate_dev" 
