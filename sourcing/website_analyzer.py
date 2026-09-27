@@ -5,10 +5,9 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-from ai.ollama_provider import OllamaProvider
+from ai.provider_factory import get_ai_provider
 from ai.prompts import BUSINESS_ANALYSIS_PROMPT
 from ai.parser import extract_json
-from config import OLLAMA_HOST, OLLAMA_MODEL
 
 
 def fetch_page(url: str, timeout: int = 15) -> str:
@@ -91,10 +90,10 @@ def analyze_business(url: str) -> dict:
     # Build AI prompt
     prompt = BUSINESS_ANALYSIS_PROMPT.format(url=url, content=text_content)
 
-    ai = OllamaProvider(host=OLLAMA_HOST, model=OLLAMA_MODEL)
-    if not ai.is_available():
+    ai = get_ai_provider()
+    if ai is None:
         return {
-            "error": "⚠ AI service unavailable. Ollama is not running. Start Ollama and try again.",
+            "error": "⚠ AI service unavailable. Configure GROQ_API_KEY or start Ollama.",
             "contacts": contacts,
             "raw_text": text_content[:2000],
         }

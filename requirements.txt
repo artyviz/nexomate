@@ -4,5 +4,5 @@ openpyxl
 SQLAlchemy
 beautifulsoup4
 requests
-ollama
+groq
 python-dotenv

@@ -2,10 +2,9 @@
 """Find competitors for a business using web search."""
 
 from sourcing.search_engine import search_duckduckgo
-from ai.ollama_provider import OllamaProvider
+from ai.provider_factory import get_ai_provider
 from ai.prompts import COMPETITOR_ANALYSIS_PROMPT
 from ai.parser import extract_json
-from config import OLLAMA_HOST, OLLAMA_MODEL
 
 
 def find_competitors(business_name: str, industry: str, services: str, location: str) -> dict:
@@ -13,9 +12,9 @@ def find_competitors(business_name: str, industry: str, services: str, location:
 
     Returns a dict with competitor_types, search_queries, and results.
     """
-    ai = OllamaProvider(host=OLLAMA_HOST, model=OLLAMA_MODEL)
+    ai = get_ai_provider()
 
-    if not ai.is_available():
+    if ai is None:
         # Fallback: generate basic queries without AI
         queries = [
             f"{industry} companies {location}",

@@ -144,7 +144,7 @@ def leads_page():
                     score_display = "—"
 
                 # Source badge
-                source_badge = "🌐" if "Autonomous" in (lead.source or "") else "🔷" if lead.source == "Explee" else "✍" if "Manual" in (lead.source or "") else "🔍" if lead.source == "Web Search" else "📁" if "Excel" in (lead.source or "") else "—"
+                source_badge = "🌐" if "Autonomous" in (lead.source or "") else "✍" if "Manual" in (lead.source or "") else "🔍" if lead.source == "Web Search" else "📁" if "Excel" in (lead.source or "") else "—"
 
                 rows.append({
                     "ID": lead.lead_id,
@@ -248,7 +248,6 @@ def leads_page():
                         """, unsafe_allow_html=True)
                     with dcol2:
                         score_color = "#4ADE80" if lead.score_level == "HIGH" else "#FACC15" if lead.score_level == "MEDIUM" else "#F87171"
-                        explee_rel = f"{lead.explee_relevance:.0%}" if lead.explee_relevance else "—"
                         st.markdown(f"""
                         <div class="noir-card">
                             <div style="font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 900; margin-bottom: 0.8rem; color: #F3F3EF;">
@@ -256,7 +255,6 @@ def leads_page():
                             </div>
                             <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.8; color: #CCCCCC;">
                                 <div><strong style="color: #888888;">FIT SCORE:</strong> <span style="color: {score_color}; font-weight: 700;">{lead.fit_score or '—'}</span> ({lead.score_level or 'UNSCORED'})</div>
-                                <div><strong style="color: #888888;">MATCH RELEVANCE:</strong> {explee_rel}</div>
                                 <div><strong style="color: #888888;">ASSESSMENT:</strong> {lead.score_reason or '—'}</div>
                                 <div><strong style="color: #888888;">SOURCE:</strong> {lead.source or '—'}</div>
                                 <div><strong style="color: #888888;">STATUS:</strong> <span class="badge-bone">{lead.lead_status}</span></div>

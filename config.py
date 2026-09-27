@@ -40,7 +40,15 @@ IMAP_PORT = int(os.getenv("IMAP_PORT", "993"))
 IMAP_USER = os.getenv("IMAP_USER", "")
 IMAP_PASSWORD = os.getenv("IMAP_PASSWORD", "")
 
-# ── Ollama ───────────────────────────────────────────────────────────────────
+# ── AI Provider ──────────────────────────────────────────────────────────────
+# AI_PROVIDER: "auto" (try Groq→Ollama), "groq" (cloud only), "ollama" (local only)
+AI_PROVIDER = os.getenv("AI_PROVIDER", "auto")
+
+# ── Groq (Free Cloud AI) ────────────────────────────────────────────────────
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
+
+# ── Ollama (Local AI) ───────────────────────────────────────────────────────
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
 

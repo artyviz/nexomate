@@ -29,10 +29,13 @@ import config
 from database.database import engine, Base, SessionLocal
 from database import models
 from database.models import Client, Lead, Campaign, Message, Reply, BusinessProfile, ICPProfile
-from ai.ollama_provider import OllamaProvider
+from ai.provider_factory import get_ai_provider
 from outreach.email_sender import is_smtp_configured
 from outreach.reply_tracker import is_imap_configured
 from excel.importer import import_from_file
+from core.logging import get_logger
+
+logger = get_logger("nexomate.live_init")
 
 
 def check_directories() -> bool:
@@ -82,12 +85,13 @@ def check_services():
     except Exception as e:
         print(f"   ⚠ Web Search: Network request failed ({e}). Offline fallback active.")
 
-    # 2. Ollama AI
-    ai = OllamaProvider(host=config.OLLAMA_HOST, model=config.OLLAMA_MODEL)
-    if ai.is_available():
-        print(f"   ✓ Local AI: Ollama running on {config.OLLAMA_HOST} (model: {config.OLLAMA_MODEL}).")
+    # 2. AI Provider
+    ai = get_ai_provider()
+    if ai is not None:
+        provider_name = type(ai).__name__.replace("Provider", "")
+        print(f"   ✓ AI Engine: {provider_name} is online and ready.")
     else:
-        print(f"   ⚠ Local AI: Ollama is offline. Template-based fallback active for scoring & messages.")
+        print(f"   ⚠ AI Engine: No provider available. Set GROQ_API_KEY or start Ollama. Template fallback active.")
 
     # 3. SMTP
     if is_smtp_configured():

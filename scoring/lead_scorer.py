@@ -1,10 +1,9 @@
 # scoring/lead_scorer.py
 """Configurable lead scoring engine for Nexomate."""
 
-from ai.ollama_provider import OllamaProvider
+from ai.provider_factory import get_ai_provider
 from ai.prompts import LEAD_SCORING_PROMPT
 from ai.parser import extract_json
-from config import OLLAMA_HOST, OLLAMA_MODEL
 
 
 # Default scoring weights (editable via settings)
@@ -136,8 +135,8 @@ def ai_score_lead(lead: dict, icp: dict) -> dict:
 
     Falls back to rule-based scoring if AI is unavailable.
     """
-    ai = OllamaProvider(host=OLLAMA_HOST, model=OLLAMA_MODEL)
-    if not ai.is_available():
+    ai = get_ai_provider()
+    if ai is None:
         result = rule_based_score(lead, icp)
         result["method"] = "rule_based"
         result["note"] = "AI unavailable — used rule-based scoring."

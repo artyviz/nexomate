@@ -1,10 +1,9 @@
 # outreach/message_generator.py
 """AI-powered outreach message generator with offline fallback templates."""
 
-from ai.ollama_provider import OllamaProvider
+from ai.provider_factory import get_ai_provider
 from ai.prompts import EMAIL_GENERATION_PROMPT, WHATSAPP_MESSAGE_PROMPT, SMS_MESSAGE_PROMPT
 from ai.parser import extract_json
-from config import OLLAMA_HOST, OLLAMA_MODEL
 
 
 def generate_fallback_email(lead: dict, client: dict) -> dict:
@@ -69,7 +68,7 @@ def generate_fallback_email(lead: dict, client: dict) -> dict:
         "subject": subject,
         "body": body,
         "method": "template",
-        "note": "Generated using built-in template fallback (Ollama offline).",
+        "note": "Generated using built-in template fallback (AI offline).",
     }
 
 
@@ -78,8 +77,8 @@ def generate_email(lead: dict, client: dict) -> dict:
 
     Tries AI first; falls back to deterministic template if Ollama is offline.
     """
-    ai = OllamaProvider(host=OLLAMA_HOST, model=OLLAMA_MODEL)
-    if not ai.is_available():
+    ai = get_ai_provider()
+    if ai is None:
         return generate_fallback_email(lead, client)
 
     prompt = EMAIL_GENERATION_PROMPT.format(
@@ -132,8 +131,8 @@ def generate_whatsapp_message(lead: dict, client: dict) -> dict:
         f"We help teams {value_prop}. Would you be open to a brief chat this week?"
     )
 
-    ai = OllamaProvider(host=OLLAMA_HOST, model=OLLAMA_MODEL)
-    if not ai.is_available():
+    ai = get_ai_provider()
+    if ai is None:
         return {"message": fallback_text, "method": "template"}
 
     prompt = WHATSAPP_MESSAGE_PROMPT.format(
@@ -169,8 +168,8 @@ def generate_sms_message(lead: dict, client: dict) -> dict:
         f"Interested in a quick 5-min intro? Reply YES to connect."
     )
 
-    ai = OllamaProvider(host=OLLAMA_HOST, model=OLLAMA_MODEL)
-    if not ai.is_available():
+    ai = get_ai_provider()
+    if ai is None:
         return {"message": fallback_text, "method": "template"}
 
     prompt = SMS_MESSAGE_PROMPT.format(

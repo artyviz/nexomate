@@ -115,9 +115,7 @@ class Lead(Base):
     fit_score = Column(Float, nullable=True)
     score_level = Column(String, nullable=True)  # HIGH / MEDIUM / LOW
     score_reason = Column(Text, nullable=True)
-    explee_relevance = Column(Float, nullable=True)  # Explee's relevance score (0-1)
-    email_verified = Column(Boolean, default=False)  # Whether email was verified by Explee
-    explee_company_id = Column(String, nullable=True)  # Explee company ID for dedup
+    email_verified = Column(Boolean, default=False)  # Whether email address is verified
 
     buying_signals = Column(Text, nullable=True)
     pain_points = Column(Text, nullable=True)
@@ -200,28 +198,4 @@ class Reply(Base):
 
     lead = relationship("Lead", back_populates="replies")
 
-
-class Source(Base):
-    __tablename__ = "sources"
-
-    source_id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    source_type = Column(String, nullable=True)  # web_search, manual, excel_import, website_scrape
-    url = Column(String, nullable=True)
-    description = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=func.now())
-
-
-class BatchJob(Base):
-    """Track async Explee API jobs (batch enrichment, find-and-enrich)."""
-    __tablename__ = "batch_jobs"
-
-    job_id = Column(Integer, primary_key=True, index=True)
-    task_id = Column(String, nullable=False)  # Explee task ID
-    job_type = Column(String, nullable=False)  # batch_enrich, find_and_enrich
-    status = Column(String, default="pending")  # pending, completed, failed
-    result_count = Column(Integer, default=0)
-    error_message = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 

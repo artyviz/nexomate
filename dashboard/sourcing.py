@@ -6,7 +6,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 from database.database import SessionLocal
-from database.models import Lead, Client, BatchJob
+from database.models import Lead, Client
 from sourcing.free_prospector import FreeProspector
 from scoring.lead_scorer import rule_based_score
 

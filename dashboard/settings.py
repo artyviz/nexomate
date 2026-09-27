@@ -6,8 +6,9 @@ from database.database import SessionLocal
 from database.models import Client, Lead, Campaign, Message, Reply
 from outreach.email_sender import is_smtp_configured
 from outreach.reply_tracker import is_imap_configured
-from ai.ollama_provider import OllamaProvider
+from ai.provider_factory import get_ai_provider
 from config import OLLAMA_HOST, OLLAMA_MODEL, SMTP_HOST, SMTP_PORT, SMTP_USER, IMAP_HOST
+from config import GROQ_API_KEY, GROQ_MODEL, AI_PROVIDER
 import json
 
 
@@ -34,29 +35,43 @@ def settings_page():
         with tab_status:
             st.markdown("### Protocol Telemetry")
 
-            # Ollama
-            ai = OllamaProvider(host=OLLAMA_HOST, model=OLLAMA_MODEL)
-            ollama_ok = ai.is_available()
+            # AI Provider
+            ai = get_ai_provider()
+            ai_ok = ai is not None
+
+            # Determine which provider is active
+            if ai_ok:
+                provider_name = type(ai).__name__.replace("Provider", "")
+                if provider_name == "Groq":
+                    ai_detail = f"GROQ CLOUD · MODEL: {GROQ_MODEL}"
+                else:
+                    ai_detail = f"OLLAMA LOCAL · HOST: {OLLAMA_HOST} · MODEL: {OLLAMA_MODEL}"
+            else:
+                if GROQ_API_KEY:
+                    ai_detail = f"GROQ KEY SET BUT UNREACHABLE · OLLAMA OFFLINE"
+                else:
+                    ai_detail = f"NO GROQ KEY · OLLAMA OFFLINE"
 
             st.markdown(f"""
             <div class="noir-card" style="padding: 1.25rem; margin-bottom: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <div style="font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: #F3F3EF;">
-                            🤖 Neural Engine (Ollama LLM)
+                            🤖 Neural Engine (AI Provider)
                         </div>
                         <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #888888; margin-top: 4px;">
-                            HOST: {OLLAMA_HOST} · MODEL: {OLLAMA_MODEL}
+                            MODE: {AI_PROVIDER.upper()} · {ai_detail}
                         </div>
                     </div>
-                    <span class="badge-{'high' if ollama_ok else 'low'}">{'ONLINE' if ollama_ok else 'OFFLINE'}</span>
+                    <span class="badge-{'high' if ai_ok else 'low'}">{'ONLINE' if ai_ok else 'OFFLINE'}</span>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-            if not ollama_ok:
-                st.warning("Neural engine disconnected. Launch local model daemon:\n\n"
-                           "```bash\nollama serve\nollama pull llama2\n```")
+            if not ai_ok:
+                st.warning("Neural engine disconnected. Options:\n\n"
+                           "**Cloud (Recommended):** Get a free API key from https://console.groq.com and set `GROQ_API_KEY` in your environment.\n\n"
+                           "**Local:** Launch Ollama:\n```bash\nollama serve\nollama pull llama3.1\n```")
 
             # SMTP
             st.markdown(f"""

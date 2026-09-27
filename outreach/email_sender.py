@@ -7,6 +7,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 from config import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, EMAIL_BATCH_DELAY_SECONDS
+from core.logging import get_logger
+
+logger = get_logger("nexomate.email")
+
 
 
 def is_smtp_configured() -> bool:
@@ -82,23 +86,27 @@ def send_email(
         server.sendmail(from_email, [to_email], msg.as_string())
         message_id = msg.get("Message-ID", "")
         server.quit()
+        logger.info(f"Email sent successfully to {to_email} (Message-ID: {message_id})")
 
         return {
             "status": "SENT",
             "message_id": message_id,
             "sent_at": datetime.now().isoformat(),
         }
-    except smtplib.SMTPAuthenticationError:
+    except smtplib.SMTPAuthenticationError as e:
+        logger.error(f"SMTP authentication failed for {from_email}: {e}")
         return {
             "status": "FAILED",
             "error": "SMTP authentication failed. Check your email/password in .env",
         }
-    except smtplib.SMTPConnectError:
+    except smtplib.SMTPConnectError as e:
+        logger.error(f"SMTP connection error connecting to {SMTP_HOST}:{SMTP_PORT}: {e}")
         return {
             "status": "FAILED",
             "error": f"Could not connect to SMTP server {SMTP_HOST}:{SMTP_PORT}",
         }
     except Exception as e:
+        logger.error(f"Failed to send email to {to_email}: {e}")
         return {
             "status": "FAILED",
             "error": f"Email sending error: {str(e)}",

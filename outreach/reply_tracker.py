@@ -7,10 +7,14 @@ from email.header import decode_header
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from database.models import Reply, Lead, Message
-from ai.ollama_provider import OllamaProvider
+from ai.provider_factory import get_ai_provider
 from ai.prompts import REPLY_CLASSIFICATION_PROMPT
 from ai.parser import extract_json
-from config import IMAP_HOST, IMAP_PORT, IMAP_USER, IMAP_PASSWORD, OLLAMA_HOST, OLLAMA_MODEL
+from config import IMAP_HOST, IMAP_PORT, IMAP_USER, IMAP_PASSWORD
+from core.logging import get_logger
+
+logger = get_logger("nexomate.reply_tracker")
+
 
 
 def is_imap_configured() -> bool:
@@ -131,6 +135,7 @@ def check_for_replies(db: Session, days_back: int = 7) -> list[dict]:
                     lead.email_status = "REPLIED"
                     db.commit()
                     db.refresh(reply_record)
+                    logger.info(f"Recorded new reply from {sender_email} for lead #{lead.lead_id} ({lead.full_name})")
 
                     found_replies.append({
                         "reply_id": reply_record.reply_id,
@@ -144,15 +149,17 @@ def check_for_replies(db: Session, days_back: int = 7) -> list[dict]:
 
         mail.logout()
     except Exception as e:
+        logger.error(f"IMAP check failed: {e}")
         return [{"error": f"IMAP error: {str(e)}"}]
 
+    logger.info(f"IMAP check completed. Found {len(found_replies)} new replies.")
     return found_replies
 
 
 def classify_reply(reply: Reply, context: str = "") -> dict:
     """Use AI to classify a reply's intent."""
-    ai = OllamaProvider(host=OLLAMA_HOST, model=OLLAMA_MODEL)
-    if not ai.is_available():
+    ai = get_ai_provider()
+    if ai is None:
         return {"classification": "UNKNOWN", "confidence": 0, "summary": "AI unavailable"}
 
     prompt = REPLY_CLASSIFICATION_PROMPT.format(

@@ -17,6 +17,10 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from scoring.lead_scorer import rule_based_score
+from core.logging import get_logger
+
+logger = get_logger("nexomate.prospector")
+
 
 # ── User-Agent pool for stealth web scraping ──────────────────────────────────
 HEADERS = {

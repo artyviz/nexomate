@@ -20,15 +20,15 @@ call venv\Scripts\activate.bat
 echo [2/5] Installing dependencies...
 pip install -r requirements.txt
 
-echo [3/5] Checking Ollama...
+echo [3/5] Checking AI configuration...
 ollama --version >nul 2>&1
 if errorlevel 1 (
-    echo [WARNING] Ollama is not installed.
-    echo Download from https://ollama.com
-    echo After installing, run: ollama pull llama2
+    echo [INFO] Ollama is not installed.
+    echo You can use free Groq Cloud AI by setting GROQ_API_KEY in .env.
+    echo Or install Ollama from https://ollama.com and run: ollama pull llama3.1
 ) else (
-    echo Ollama found. Pulling model...
-    ollama pull llama2
+    echo [INFO] Ollama found. You can pull llama3.1 if running locally:
+    echo        ollama pull llama3.1
 )
 
 echo [4/5] Initializing database...
